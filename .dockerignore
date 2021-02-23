@@ -1,0 +1,9 @@
+# ignore these files
+.git
+.dockerignore
+.editorconfig
+#.env
+.env-dist
+composer.lock
+vendor/
+auth.json
