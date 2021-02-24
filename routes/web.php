@@ -20,3 +20,5 @@ $router->get('/', function () use ($router) {
 $router->get('/key', function() {
     return Str::random(32);
 });
+
+$router->get('health', 'HealthController@index');

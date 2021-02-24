@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-class ExampleController extends Controller
+class HealthController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -28,7 +28,7 @@ class ExampleController extends Controller
      * )
      * )
      */
-    public function health(): string
+    public function index(): string
     {
         return "Server Up";
     }
