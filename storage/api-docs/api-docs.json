@@ -1,0 +1,30 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Evermos API Docs",
+        "contact": {
+            "email": "bagus.seno39@gmail.com"
+        },
+        "version": "1.0.0"
+    },
+    "basePath": "/",
+    "schemes": [
+        "http"
+    ],
+    "paths": {
+        "/annotation": {
+            "get": {
+                "summary": "Version",
+                "responses": {
+                    "200": {
+                        "description": "Working"
+                    },
+                    "default": {
+                        "description": "an \"unexpected\" error"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {}
+}
