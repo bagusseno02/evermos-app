@@ -1,30 +1,7 @@
-# EVERMOS - TASK 1: Online Store
-### 1. PERMASALAHAN :
-Masalah tersebut terjadi dikarenakan adanya request secara bersamaan **(concurrency request)**  
-Contoh Kasus :
-- Transaksi A, menjalankan perintah `UPDATE` pada data stok (tetapi belum dicommit). Transaksi B, membaca data stok tersebut. Lalu Transaksi B tidak jadi menjalankan perintah `UPDATE` tersebut dengan perintah `ROLLBACK`, dengan ini transaksi B membaca data stok yang tidak valid
-- Transaksi A melakukan pembelian produk yang sama dengan Transaksi B secara bersamaan atau berdekatan, maka dapat digambarkan seperti berikut :
-
--------     ------ ----------   -------
-    Transaksi A                         Transaksi B
-    Select 2 Item Dari 10
-                                        Select 3 Item Dari 10               
-    Update Stok Item Menjadi 8  
-                                        Update Stok Item Menjadi 7
-    Commit          
-                                        Commit
-
-Ketika Proses diatas terjadi maka akan didapatkan total stok : 7, seharusnya 5. fenomena atau issue diatas biasa disebut dirty read.
-
-### 2. SOLUSI :
-Kita dapat menggunakan **queue** akan tetapi akan terjadi masalah baru ketika **concurrency request** terlalu banyak akan berpengaruh terhadap performa aplikasi, maka dari itu solusi efektif untuk mengatasi hal tersebut adalah dengan **isolation level**, kita dapat set **isolation level** menjadi ``Read Commited``.
-Selanjutnya kita perlu menambakan _keyword_ ```for update``` pada akhir query select. `For Update` memberitahukan bahwa sedang ada transaksi sehingga transaksi lain harus menunggu proses _locking_ di _release_. _locking_ di _release_ saat transaksi selesai dan transaksi berikutnya dapat dilanjutkan.
-
-
 # Library
 - Dockerize
-- Custom Package [coreapi/api-utilities]
-- Swagger Documentation
+- Custom package [coreapi/api-utilities]
+
 
 # Lumen PHP Framework
 
