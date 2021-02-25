@@ -1,70 +1,75 @@
 FROM php:7.0.33-apache-stretch as builder
 
-ARG APP_ENV=development
-ARG BASE64_PRIVATE_KEY
-ARG REPO_NAME
-ARG CONSUL_PREFIX
-ARG CONSUL_ADDR
-ARG ENV_MODE
+# Install common tools 
+RUN apt-get update
+RUN apt-get install -y wget curl nano htop git unzip bzip2 software-properties-common locales
 
+# Set evn var to enable xterm terminal
+ENV TERM=xterm
+
+# Set timezone to UTC to avoid tzdata interactive mode during build
+ENV TZ=Etc/UTC
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Set working directory
 WORKDIR /var/www/html
 
-RUN a2enmod rewrite
+# Set up locales 
+# RUN locale-gen 
 
+#------------- Application Specific Stuff ----------------------------------------------------
+
+# Install PHP
+RUN LC_ALL=C.UTF-8 add-apt-repository ppa:ondrej/php
+RUN apt update
+RUN apt-get install -y \
+    php7.0-fpm \ 
+    php7.0-common \ 
+    php7.0-curl \ 
+    php7.0-pgsql \ 
+    php7.0-mbstring \ 
+    php7.0-json \
+    php7.0-xml \
+    php7.0-bcmath
+
+# Install NPM and Node.js
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
+RUN apt-get install -y nodejs 
+
+#------------- FPM & Nginx configuration ----------------------------------------------------
+
+# Config fpm to use TCP instead of unix socket
+ADD resources/www.conf /etc/php/7.0/fpm/pool.d/www.conf
+RUN mkdir -p /var/run/php
+
+# Install Nginx
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 4F4EA0AAE5267A6C
+RUN echo "deb http://nginx.org/packages/ubuntu/ trusty nginx" >> /etc/apt/sources.list
+RUN echo "deb-src http://nginx.org/packages/ubuntu/ trusty nginx" >> /etc/apt/sources.list
 RUN apt-get update
-RUN apt-get install -y supervisor curl openssh-server openssh-client git libpng-dev zlib1g-dev libzip-dev libmcrypt-dev zip unzip
 
-COPY ./deploy/apache-config.conf /etc/apache2/sites-enabled/000-default.conf
-COPY ./deploy/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
-COPY ./deploy/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+RUN apt-get install -y nginx
 
-# setup php modules
-RUN docker-php-ext-configure pdo_mysql && \
-    docker-php-ext-configure bcmath && \
-    docker-php-ext-configure opcache && \
-    docker-php-ext-configure gd && \
-    docker-php-ext-configure zip && \
-    docker-php-ext-install pdo_mysql bcmath opcache gd zip
+ADD resources/default /etc/nginx/sites-enabled/
+ADD resources/nginx.conf /etc/nginx/
 
-# install composer
-RUN curl -sS https://getcomposer.org/installer -o /tmp/composer-setup.php \
-&&  php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer \
-&&  rm -rf /var/cache/apk/*
+#------------- Composer & laravel configuration ----------------------------------------------------
 
-#setup ssh
-RUN mkdir -p /root/.ssh \
-&&  chmod 700 /root/.ssh \
-&&  ssh-keyscan bitbucket.org > /root/.ssh/known_hosts
+# Install composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-RUN echo "$BASE64_PRIVATE_KEY" | base64 -d > /root/.ssh/id_rsa \
-&&  chmod 700 /root/.ssh/id_rsa
+#------------- Supervisor Process Manager ----------------------------------------------------
 
-COPY composer.json /var/www/html/
-COPY database /var/www/html/database
-RUN mkdir tests
+# Install supervisor
+RUN apt-get install -y supervisor
+RUN mkdir -p /var/log/supervisor
+ADD resources/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-ENV COMPOSER_MEMORY_LIMIT=-1
+#------------- Container Config ---------------------------------------------------------------
 
-RUN composer install
+# Expose port 80
+EXPOSE 80
 
-COPY . /var/www/html
-
-RUN rm -rf storage/logs
-RUN mkdir -p storage/logs \
-&&  chmod -R a+rwx storage/logs \
-&&  chmod -R a+rwx storage/app
-
-RUN composer dumpautoload -o
-
-#consul
-RUN tar -xvf ./deploy/envconsul_0.9.1_linux_amd64.tgz \
-    && make env-$ENV_MODE \
-    && apt-get remove -y git \
-    && apt-get purge -y git \
-    && rm -rf /root/.ssh
-
-CMD ["/usr/bin/supervisord"]
-#CMD ["sh", "cmd.sh"]
-
-HEALTHCHECK --interval=3m --timeout=3s \
-  CMD curl -f http://127.0.0.1:80/healthz || exit 1
+# Set supervisor to manage container processes
+ENTRYPOINT ["/usr/bin/supervisord"]

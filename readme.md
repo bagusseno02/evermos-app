@@ -1,6 +1,5 @@
 # EVERMOS - TASK 1: Online Store
 
---------------------------------------------
 ### 1. PERMASALAHAN :
 Masalah tersebut terjadi dikarenakan adanya request secara bersamaan **(concurrency request)**  
 Contoh Kasus :
@@ -24,35 +23,267 @@ Selanjutnya kita perlu menambakan _keyword_ ```for update``` pada akhir query se
 
 ## EVERMOS - TASK 2: Treasure Hunt
 
-------------------------------------------------
 - Menjalankan file php pada root project dengan command :
 ```
 php TreasureHunt.php
 ```
 
-# Library
-- Dockerize
-- Custom Package [coreapi/api-utilities]
-- Swagger Documentation
+# How To Check Endpoint Available
+```
+php artisan route:list
+```
 
-# Lumen PHP Framework
+# How To Build & Run?
+```
+setup .env with .env.example
+```
+```
+composer install
+```
+```
+ sh ./start_server.sh
+```
+or
+```
+php -S localhost:{port} -t public
+```
 
-[![Build Status](https://travis-ci.org/laravel/lumen-framework.svg)](https://travis-ci.org/laravel/lumen-framework)
-[![Total Downloads](https://poser.pugx.org/laravel/lumen-framework/d/total.svg)](https://packagist.org/packages/laravel/lumen-framework)
-[![Latest Stable Version](https://poser.pugx.org/laravel/lumen-framework/v/stable.svg)](https://packagist.org/packages/laravel/lumen-framework)
-[![Latest Unstable Version](https://poser.pugx.org/laravel/lumen-framework/v/unstable.svg)](https://packagist.org/packages/laravel/lumen-framework)
-[![License](https://poser.pugx.org/laravel/lumen-framework/license.svg)](https://packagist.org/packages/laravel/lumen-framework)
+# GITFLOW-IMPLEMENTATION
+- master
+- develop
+- feature
+- bugfix
+- hotfix
+- release
 
-Laravel Lumen is a stunningly fast PHP micro-framework for building web applications with expressive, elegant syntax. We believe development must be an enjoyable, creative experience to be truly fulfilling. Lumen attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as routing, database abstraction, queueing, and caching.
+If ticketing system in git repository just add #{issue_number} in commit message
 
-## Official Documentation
+# Api Docs
+## Product
 
-Documentation for the framework can be found on the [Lumen website](http://lumen.laravel.com/docs).
+-----------
+### Create Product
+#### Method POST
+```
+localhost:8087/product/create
+```
+#### Request Payload
+```
+{
+	"name": "Handphone",
+	"price": 500000,
+	"stock": 10,
+	"category_product_id" : 1,
+	"expired_date": "2020/12/12",
+	"bpm_number": "string",
+	"supplier_id" : 2,
+	"price_event": 4000,
+	"event_id": 2
+}
+```
+#### Response
+```
+{
+    "error": false,
+    "message": "Successfully create product",
+    "data": {
+        "id": 10,
+        "code": "P074457",
+        "name": "Handphone",
+        "price": "500000",
+        "category_product_id": "[{'Master Category Product'}]",
+        "expired_date": "2020/12/12",
+        "bpom_number": null,
+        "supplier_id": "[{'Master SUpplier'}]",
+        "price_event": "4000",
+        "event_id": "[{'Master Category Product'}]"
+    }
+}
+```
 
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Lumen, please send an e-mail to Taylor Otwell at taylor@laravel.com. All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Lumen framework is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT)
+--------------
+### Detail
+#### Method GET
+```
+localhost:8087/product/detail/{id}
+```
+#### Response
+```
+{
+    "error": false,
+    "message": "Successfully get product detail",
+    "data": {
+        "id": 4,
+        "name": "Tas",
+        "code": "P094868",
+        "category_product_id": 1,
+        "price": "500000",
+        "expired_date": null,
+        "bpom_number": null,
+        "supplier_id": null,
+        "packaging_id": null,
+        "created_at": "2021-02-25 20:16:06",
+        "created_by": null,
+        "updated_at": null,
+        "updated_by": null,
+        "deleted_at": null,
+        "deleted_by": null,
+        "is_deleted": false,
+        "price_event": null,
+        "stock": 10,
+        "event_id": null
+    }
+}
+```
+-----------
+### Delete 
+#### Method DELETE
+```
+localhost:8087/product/delete/{id}
+```
+#### Response
+```
+{
+    "error": false,
+    "message": "Product has been deleted"
+}
+```
+---------------------------------
+### Update
+#### Method PUT
+```
+localhost:8087/product/update/{id}
+```
+#### Request Payload
+```
+{
+	"name": "Headset",
+	"price": 500000,
+	"stock": 10,
+	"category_product_id" : 1,
+	"expired_date": "2020/12/12",
+	"bpm_number": "string",
+	"supplier_id" : 2,
+	"price_event": 4000,
+	"event_id": 2
+}
+```
+#### Response
+```
+{
+    "error": false,
+    "message": "Successfully update product",
+    "data": {
+        "id": 5,
+        "code": "P070562",
+        "name": "Headset",
+        "price": "500000",
+        "category_product_id": "[{'Master Category Product'}]",
+        "expired_date": "2020/12/12",
+        "bpom_number": null,
+        "supplier_id": "[{'Master SUpplier'}]",
+        "price_event": "4000",
+        "event_id": "[{'Master Category Product'}]"
+    }
+}
+```
+----------------------
+### List
+#### Method POST
+```
+localhost:8087/product/list
+```
+#### Request Payload
+```
+{
+    "pagination": {
+        "limit": 0,
+        "page": 10,
+        "column": "created_at",
+        "ascending": false,
+        "query":""
+    }
+}
+```
+#### Response
+```
+{
+    "error": false,
+    "message": "Successfully get list product",
+    "length": 6,
+    "data": [
+        {
+            "id": 5,
+            "code": "P070562",
+            "name": "Headset",
+            "price": "500000",
+            "category_product_id": "[{'Master Category Product'}]",
+            "expired_date": "2020-12-12",
+            "bpom_number": null,
+            "supplier_id": "[{'Master SUpplier'}]",
+            "price_event": "4000",
+            "event_id": "[{'Master Category Product'}]"
+        },
+        {
+            "id": 10,
+            "code": "P074457",
+            "name": "Handphone",
+            "price": "500000",
+            "category_product_id": "[{'Master Category Product'}]",
+            "expired_date": "2020-12-12",
+            "bpom_number": null,
+            "supplier_id": "[{'Master SUpplier'}]",
+            "price_event": "4000",
+            "event_id": "[{'Master Category Product'}]"
+        },
+        {
+            "id": 9,
+            "code": "P016643",
+            "name": "Handphone",
+            "price": "500000",
+            "category_product_id": "[{'Master Category Product'}]",
+            "expired_date": "2020-12-12",
+            "bpom_number": null,
+            "supplier_id": "[{'Master SUpplier'}]",
+            "price_event": "4000",
+            "event_id": "[{'Master Category Product'}]"
+        },
+        {
+            "id": 8,
+            "code": "P033308",
+            "name": "Handphone",
+            "price": "500000",
+            "category_product_id": "[{'Master Category Product'}]",
+            "expired_date": "2020-12-12",
+            "bpom_number": null,
+            "supplier_id": "[{'Master SUpplier'}]",
+            "price_event": "4000",
+            "event_id": "[{'Master Category Product'}]"
+        },
+        {
+            "id": 7,
+            "code": "P026040",
+            "name": "Tas",
+            "price": "500000",
+            "category_product_id": "[{'Master Category Product'}]",
+            "expired_date": "2021-10-10",
+            "bpom_number": null,
+            "supplier_id": "[{'Master SUpplier'}]",
+            "price_event": null,
+            "event_id": "[{'Master Category Product'}]"
+        },
+        {
+            "id": 6,
+            "code": "P016145",
+            "name": "Tas",
+            "price": "500000",
+            "category_product_id": "[{'Master Category Product'}]",
+            "expired_date": "2021-10-10",
+            "bpom_number": null,
+            "supplier_id": "[{'Master SUpplier'}]",
+            "price_event": null,
+            "event_id": "[{'Master Category Product'}]"
+        }
+    ]
+}
+```
