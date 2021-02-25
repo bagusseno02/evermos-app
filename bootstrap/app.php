@@ -1,9 +1,11 @@
 <?php
 
+use Monolog\Logger;
+
 require_once __DIR__.'/../vendor/autoload.php';
 
 try {
-    (new Dotenv\Dotenv(__DIR__.'/../'))->load();
+    (new Dotenv\Dotenv(__DIR__.'/../'))->overload();
 } catch (Dotenv\Exception\InvalidPathException $e) {
     //
 }
@@ -12,7 +14,12 @@ $app = new Laravel\Lumen\Application(
     realpath(__DIR__.'/../')
 );
 
+$log = new Logger('app');
+$prefix = '';
+
+$app->configure('swagger-lume');
 $app->configure('app');
+$app->configure('fractal');
 
 /*
 |--------------------------------------------------------------------------
@@ -84,8 +91,8 @@ $app->singleton(
 |
 */
 
-$app->configure('swagger-lume');
 $app->register(\SwaggerLume\ServiceProvider::class);
+$app->register(Flipbox\LumenGenerator\LumenGeneratorServiceProvider::class);
 // $app->register(App\Providers\AppServiceProvider::class);
 // $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
@@ -103,8 +110,16 @@ $app->register(\SwaggerLume\ServiceProvider::class);
 
 $app->router->group([
     'namespace' => 'App\Http\Controllers',
+    'prefix' => $prefix
 ], function ($router) {
     require __DIR__.'/../routes/web.php';
 });
-
+/** Another function helper */
+if (!function_exists('is_not_null')) {
+    function is_not_null($var)
+    {
+        $variable = $var;
+        return isset($variable) && !empty($variable);
+    }
+}
 return $app;
